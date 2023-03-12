@@ -12,14 +12,14 @@ string[,] map = generator.Generate();
 void DrawPath(string[,] myMap, List<Point> path)
 {
     Point startPoint = path[0];
-    myMap[startPoint.Row, startPoint.Column] = "A";
+    myMap[startPoint.Column, startPoint.Row] = "A";
     for (int i = 1; i< path.Count-1; i++)
     {
         Point point = path[i];
-        myMap[point.Row, point.Column] = ".";
+        myMap[point.Column, point.Row] = ".";
     }
     Point endPoint = path[path.Count - 1];
-    myMap[endPoint.Row, endPoint.Column] = "B";
+    myMap[endPoint.Column, endPoint.Row] = "B";
 }
 
 bool IsEqual(Point a, Point b)
@@ -100,13 +100,9 @@ List<Point> SimpleBFS(string[,] myMap, Point start, Point end)
 
     result.Reverse();
     return result;
-}
-// List<Point> myPath = SimpleBFS(map, new Point(0,0), new Point(0,18) );
-// DrawPath(map, myPath);
-List<Point> somePath = new List<Point>
-{
-    new Point(0, 0),
-    new Point(0, 1)
-};
-DrawPath(map, somePath);
+}   
+new MapPrinter().Print(map);
+List<Point> myPath = SimpleBFS(map, new Point(0,0), new Point(0,18) );
+DrawPath(map, myPath);
+
 new MapPrinter().Print(map);
