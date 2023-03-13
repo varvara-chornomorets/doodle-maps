@@ -2,9 +2,12 @@
 
 var generator = new MapGenerator(new MapGeneratorOptions()
 {
-    Height = 20,
-    Width = 40,
-    Seed = 50 ,
+    Height = 10,
+    Width = 10,
+    Seed = 5687687,
+    Noise = 0.1f,
+    AddTraffic = true,
+    TrafficSeed = 58,
 });
 
 string[,] map = generator.Generate();
@@ -100,9 +103,87 @@ List<Point> SimpleBFS(string[,] myMap, Point start, Point end)
 
     result.Reverse();
     return result;
-}   
+}
+
+
+Point MinimalPoint (List<Point> ToBeChecked, Dictionary<Point, int> costs)
+{
+    Point minimal = ToBeChecked[0];
+    foreach (var point in ToBeChecked)
+    {
+        if (costs[point] < costs[minimal])
+        {
+            minimal = point;
+        }
+    }
+
+    return minimal;
+}
+
+List<Point> Dijkstra(string[,] myMap, Point start, Point end)
+{
+    List<Point> ToBeChecked = new List<Point>();
+    ToBeChecked.Add(start);
+    List<Point> checkedPoints = new List<Point>();
+    var origins = new Dictionary<Point, Point?>();
+    origins[start] = null;
+    var costs = new Dictionary<Point, int>();
+    costs[start] = 0;
+    while (ToBeChecked.Count > 0)
+    {
+        // take minimal point
+        Point currentPoint = MinimalPoint(ToBeChecked, costs);
+        ToBeChecked.Remove(currentPoint);
+        // check if it is finish
+        if (IsEqual(currentPoint, end))
+        {
+            break;
+        }
+        // add point to the list of checked Points
+        checkedPoints.Add(currentPoint);
+        // add its non-checked neighbours to the queue
+        List<Point> currentNeighbours = GetNeighbours(currentPoint, myMap);
+        foreach (var neighbour in currentNeighbours)
+        {
+            if (!checkedPoints.Contains(neighbour))
+            {
+                int column = neighbour.Column;
+                int row = neighbour.Row;
+                int nieghbourTraffic = int.Parse(myMap[column, row]);
+                costs[neighbour] = costs[currentPoint] + nieghbourTraffic;
+                ToBeChecked.Add(neighbour);
+                checkedPoints.Add(neighbour);
+                // add this points to the dictionary, their parent is currentPoint
+                origins[neighbour] = currentPoint;
+            }
+        }
+    }
+
+    List<Point> result = new List<Point>();
+    result.Add(end);
+    Point currentValue = end;
+    while (!IsEqual(currentValue, start))
+    {
+        var currentParent = origins[currentValue];
+        result.Add(currentParent.Value);
+        currentValue = currentParent.Value;
+
+
+    }
+
+    result.Reverse();
+    return result;
+    {
+        
+    }
+}
+
 new MapPrinter().Print(map);
-List<Point> myPath = SimpleBFS(map, new Point(0,0), new Point(18,18) );
+List<Point> myPath = Dijkstra(map, new Point(6,0), new Point(4,8) );
+DrawPath(map, myPath);
+
+new MapPrinter().Print(map);
+myPath = SimpleBFS(map, new Point(6,0), new Point(4,8));
 DrawPath(map, myPath);
 
 new MapPrinter().Print(map);
