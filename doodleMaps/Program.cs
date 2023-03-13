@@ -3,8 +3,8 @@
 var generator = new MapGenerator(new MapGeneratorOptions()
 {
     Height = 20,
-    Width = 20,
-    Seed = 12 ,
+    Width = 40,
+    Seed = 50 ,
 });
 
 string[,] map = generator.Generate();
@@ -27,7 +27,7 @@ bool IsEqual(Point a, Point b)
     return (a.Column == b.Column && a.Row == b.Row);
 }
 
-List<Point> GetNeighbours(Point mainPoint)
+List<Point> GetNeighbours(Point mainPoint, string[,] myMap)
 {
     List<Point> neighbours = new List<Point>();
     int x = mainPoint.Column;
@@ -42,9 +42,9 @@ List<Point> GetNeighbours(Point mainPoint)
     foreach (var varPotentialNeighbour in potentialNeighbours)
     {
         // if it is in the map AND it is not wall
-        if (0 <= varPotentialNeighbour.Column && varPotentialNeighbour.Column < map.GetLength(0) &&
-            0 <= varPotentialNeighbour.Row && varPotentialNeighbour.Row < map.GetLength(1) &&
-            map[varPotentialNeighbour.Column, varPotentialNeighbour.Row] != "█")
+        if (0 <= varPotentialNeighbour.Column && varPotentialNeighbour.Column < myMap.GetLength(0) &&
+            0 <= varPotentialNeighbour.Row && varPotentialNeighbour.Row < myMap.GetLength(1) &&
+            myMap[varPotentialNeighbour.Column, varPotentialNeighbour.Row] != "█")
         {
             neighbours.Add(varPotentialNeighbour);
         }
@@ -73,7 +73,7 @@ List<Point> SimpleBFS(string[,] myMap, Point start, Point end)
         // add point to the list of checked Points
         checkedPoints.Add(currentPoint);
         // add its non-checked neighbours to the queue
-        List<Point> currentNeighbours = GetNeighbours(currentPoint);
+        List<Point> currentNeighbours = GetNeighbours(currentPoint, myMap);
         foreach (var neighbour in currentNeighbours)
         {
             if (!checkedPoints.Contains(neighbour))
@@ -102,7 +102,7 @@ List<Point> SimpleBFS(string[,] myMap, Point start, Point end)
     return result;
 }   
 new MapPrinter().Print(map);
-List<Point> myPath = SimpleBFS(map, new Point(0,0), new Point(0,18) );
+List<Point> myPath = SimpleBFS(map, new Point(0,0), new Point(18,18) );
 DrawPath(map, myPath);
 
 new MapPrinter().Print(map);
