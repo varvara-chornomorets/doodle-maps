@@ -128,7 +128,7 @@ Point MinimalPoint (List<Point> ToBeChecked, Dictionary<Point, float> costs)
     var origins = new Dictionary<Point, Point?>();
     origins[start] = null;
     var costs = new Dictionary<Point, float>();
-    costs[start] = 0.0f;
+    costs[start] = float.Parse(map[start.Column, start.Row]);
     Point currentPoint = new Point(0, 0);
     while (ToBeChecked.Count > 0)
     {
@@ -160,7 +160,7 @@ Point MinimalPoint (List<Point> ToBeChecked, Dictionary<Point, float> costs)
         }
     }
 
-    float timeTaken = costs[currentPoint];
+    float timeTaken = costs[currentPoint] - 1.0f/(60-(float.Parse(map[end.Column, end.Row])-1))*6;
     string totalTime = timeTaken.ToString("F2");
     List<Point> result = new List<Point>();
     result.Add(end);
