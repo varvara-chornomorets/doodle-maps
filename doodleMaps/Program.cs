@@ -2,8 +2,8 @@
 
 var generator = new MapGenerator(new MapGeneratorOptions()
 {
-    Height = 10,
-    Width = 10,
+    Height = 100,
+    Width = 100,
     Seed = 5687687,
     Noise = 0.1f,
     AddTraffic = true,
@@ -106,7 +106,7 @@ List<Point> SimpleBFS(string[,] myMap, Point start, Point end)
 }
 
 
-Point MinimalPoint (List<Point> ToBeChecked, Dictionary<Point, int> costs)
+Point MinimalPoint (List<Point> ToBeChecked, Dictionary<Point, float> costs)
 {
     Point minimal = ToBeChecked[0];
     foreach (var point in ToBeChecked)
@@ -120,19 +120,20 @@ Point MinimalPoint (List<Point> ToBeChecked, Dictionary<Point, int> costs)
     return minimal;
 }
 
-List<Point> Dijkstra(string[,] myMap, Point start, Point end)
+(List<Point>,string) Dijkstra(string[,] myMap, Point start, Point end)
 {
     List<Point> ToBeChecked = new List<Point>();
     ToBeChecked.Add(start);
     List<Point> checkedPoints = new List<Point>();
     var origins = new Dictionary<Point, Point?>();
     origins[start] = null;
-    var costs = new Dictionary<Point, int>();
-    costs[start] = 0;
+    var costs = new Dictionary<Point, float>();
+    costs[start] = 0.0f;
+    Point currentPoint = new Point(0, 0);
     while (ToBeChecked.Count > 0)
     {
         // take minimal point
-        Point currentPoint = MinimalPoint(ToBeChecked, costs);
+        currentPoint = MinimalPoint(ToBeChecked, costs);
         ToBeChecked.Remove(currentPoint);
         // check if it is finish
         if (IsEqual(currentPoint, end))
@@ -141,7 +142,7 @@ List<Point> Dijkstra(string[,] myMap, Point start, Point end)
         }
         // add point to the list of checked Points
         checkedPoints.Add(currentPoint);
-        // add its non-checked neighbours to the queue
+        // add its non-checked neighbours to the list
         List<Point> currentNeighbours = GetNeighbours(currentPoint, myMap);
         foreach (var neighbour in currentNeighbours)
         {
@@ -150,7 +151,7 @@ List<Point> Dijkstra(string[,] myMap, Point start, Point end)
                 int column = neighbour.Column;
                 int row = neighbour.Row;
                 int nieghbourTraffic = int.Parse(myMap[column, row]);
-                costs[neighbour] = costs[currentPoint] + nieghbourTraffic;
+                costs[neighbour] = costs[currentPoint] + 1.0f/(60-(nieghbourTraffic-1)*6);
                 ToBeChecked.Add(neighbour);
                 checkedPoints.Add(neighbour);
                 // add this points to the dictionary, their parent is currentPoint
@@ -159,6 +160,8 @@ List<Point> Dijkstra(string[,] myMap, Point start, Point end)
         }
     }
 
+    float timeTaken = costs[currentPoint];
+    string totalTime = timeTaken.ToString("F2");
     List<Point> result = new List<Point>();
     result.Add(end);
     Point currentValue = end;
@@ -172,18 +175,20 @@ List<Point> Dijkstra(string[,] myMap, Point start, Point end)
     }
 
     result.Reverse();
-    return result;
+    return (result, totalTime);
     {
         
     }
 }
 
+
 new MapPrinter().Print(map);
-List<Point> myPath = Dijkstra(map, new Point(6,0), new Point(4,8) );
+(List<Point> myPath, string totalTime) = Dijkstra(map, new Point(6,0), new Point(8,8) );
 DrawPath(map, myPath);
 
 new MapPrinter().Print(map);
-myPath = SimpleBFS(map, new Point(6,0), new Point(4,8));
+Console.WriteLine("time taken: "+totalTime);
+myPath = SimpleBFS(map, new Point(6, 0), new Point(8, 8));
 DrawPath(map, myPath);
 
 new MapPrinter().Print(map);
