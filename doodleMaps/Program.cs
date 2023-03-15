@@ -8,7 +8,7 @@ var generator = new MapGenerator(new MapGeneratorOptions()
 {
     Height = HEIGHT,
     Width = WIDTH,
-    Noise = 0.5F,
+    Noise = 0.1F,
 });
 
 
@@ -51,8 +51,6 @@ string[,] CreatePaths(string[,] mapEdited, Point start, Point goal)
                             {
                                 var num = num1 + 1;
                                 mapEdited[point.Column, point.Row] = num.ToString();
-                                new MapPrinter().Print(mapEdited);
-                                Console.WriteLine(i+" "+k);
                             }
                             
 
@@ -95,9 +93,8 @@ string[,] FindPath(string[,] mapOrigin, string[,] map, Point goal)
     {
         if (0 <= point.Column && point.Column < WIDTH && 0 <= point.Row && point.Row < HEIGHT)
         {
-            if (map[point.Column, point.Row] != "█")
+            if (int.TryParse(map[point.Column, point.Row], out int num1))
             {
-                var num1 = int.Parse(map[point.Column, point.Row]);
                 if (num1 < num || num == -1)
                 {
                     num = num1;
@@ -157,5 +154,5 @@ for (int i = 0; i < WIDTH; i++)
 //GetShortestPath(map, new Point(0, 0), new Point(6, 12)));
 mapCopy = CreatePaths(mapCopy, new Point(0, 0), new Point(WIDTH - 2, HEIGHT - 2));
 new MapPrinter().Print(mapCopy);
-map = FindPath(map, mapCopy, new Point(WIDTH - 2, 2));
+map = FindPath(map, mapCopy, new Point(WIDTH - 2, HEIGHT - 2));
 new MapPrinter().Print(map);
