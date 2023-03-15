@@ -8,7 +8,7 @@ var generator = new MapGenerator(new MapGeneratorOptions()
 {
     Height = HEIGHT,
     Width = WIDTH,
-    Seed = 12 ,
+    Noise = 0.5F,
 });
 
 
@@ -21,44 +21,11 @@ Point Move(Point point, int columnMove, int rowMove)
 
 
 
-
-void CreateNodes(string[,] map)
-{
-    for (int i = 0; i < WIDTH; i++)
-    {
-        for (int k = 0; k < HEIGHT; k++)
-        {
-            if (map[i, k] == "█")
-                continue;
-            var position = new Point(i, k);
-            List<Point> points = new List<Point>();
-            points.Add(Move(position, 1, 0));
-            points.Add(Move(position, -1, 0));
-            points.Add(Move(position, 0, 1));
-            points.Add(Move(position, 0, -1));
-            List<Point> toRemove = new List<Point>();
-            foreach (var point in points)
-            {
-                if (0 <= point.Column && point.Column <= 20 && 0 <= point.Row && point.Row <= 20)
-                {
-                    if (map[point.Column, point.Row] == "█")
-                        toRemove.Add(point);
-                }
-                else
-                    toRemove.Add(point);
-            }
-            foreach (var point in toRemove)
-                points.Remove(point);
-            if (points.Count >= 3)
-                map[position.Column, position.Row] = "*";
-        }
-    }
-}
-
 string[,] CreatePaths(string[,] mapEdited, Point start, Point goal)
 {
     mapEdited[start.Column, start.Row] = "0";
-    mapEdited[goal.Column, goal.Row] = "#";
+    int counter1 = 0;
+    
     while (true)
     {
         int counter = 0;
@@ -68,7 +35,7 @@ string[,] CreatePaths(string[,] mapEdited, Point start, Point goal)
             {
                 if (mapEdited[i, k] == "█")
                     continue;
-                if (int.TryParse(mapEdited[i, k], out int n))
+                if (int.TryParse(mapEdited[i, k], out int num1))
                 {
                     var position = new Point(i, k);
                     List<Point> points = new List<Point>();
@@ -78,45 +45,36 @@ string[,] CreatePaths(string[,] mapEdited, Point start, Point goal)
                     points.Add(Move(position, 0, -1));
                     foreach (var point in points)
                     {
-                        if (0 <= point.Column && point.Column <= 20 && 0 <= point.Row && point.Row <= 20)
+                        if (0 <= point.Column && point.Column < WIDTH && 0 <= point.Row && point.Row < HEIGHT)
                         {
                             if (mapEdited[point.Column, point.Row] == " ")
                             {
-                                var num = int.Parse(mapEdited[position.Column, position.Row]);
-                                num++;
+                                var num = num1 + 1;
                                 mapEdited[point.Column, point.Row] = num.ToString();
+                                new MapPrinter().Print(mapEdited);
+                                Console.WriteLine(i+" "+k);
                             }
-                        }
-                    }
-                }
+                            
 
-                else if (mapEdited[i, k] == "#")
-                {
-                    var position = new Point(i, k);
-                    List<Point> points = new List<Point>();
-                    points.Add(Move(position, 1, 0));
-                    points.Add(Move(position, -1, 0));
-                    points.Add(Move(position, 0, 1));
-                    points.Add(Move(position, 0, -1));
-                    foreach (var point in points)
-                    {
-                        if (0 <= point.Column && point.Column <= 20 && 0 <= point.Row && point.Row <= 20)
-                        {
-                            int.TryParse(mapEdited[point.Column, point.Row], out int num);
-                            if (mapEdited[point.Column, point.Row] == " ")
+                            else if (int.TryParse(mapEdited[point.Column, point.Row], out int num2))
                             {
-                                num++;
-                                mapEdited[point.Column, point.Row] = num.ToString();
+                                if (num2 != num1 + 1 && num2 != num1 - 1 && num2 > num1)
+                                {
+                                    var num = num1 + 1;
+                                    mapEdited[point.Column, point.Row] = num.ToString();
+                                }
                             }
                         }
                     }
+                    
                 }
                 else if (mapEdited[i, k] == " ")
                     counter++;
             }
         }
-        if(counter == 0)
+        if(counter == 0 || counter == counter1 || mapEdited[goal.Column, goal.Row] != " ")
             break;
+        counter1 = counter;
     }
 
     return mapEdited;
@@ -125,43 +83,45 @@ string[,] CreatePaths(string[,] mapEdited, Point start, Point goal)
 string[,] FindPath(string[,] mapOrigin, string[,] map, Point goal)
 {
     mapOrigin[goal.Column, goal.Row] = "B";
+    map[goal.Column, goal.Row] = "#";
     Point position = goal;
     List<Point> points = new List<Point>();
     points.Add(Move(position, 1, 0));
     points.Add(Move(position, -1, 0));
     points.Add(Move(position, 0, 1));
     points.Add(Move(position, 0, -1));
-    int num = 200;
+    int num = -1;
     foreach (var point in points)
     {
-        if (0 <= point.Column && point.Column <= 20 && 0 <= point.Row && point.Row <= 20)
+        if (0 <= point.Column && point.Column < WIDTH && 0 <= point.Row && point.Row < HEIGHT)
         {
             if (map[point.Column, point.Row] != "█")
             {
                 var num1 = int.Parse(map[point.Column, point.Row]);
-                if (num1 < num)
+                if (num1 < num || num == -1)
                 {
                     num = num1;
                     position = point;
-                    mapOrigin[point.Column, point.Row] = ".";
                 }
             }
         }
     }
+    mapOrigin[position.Column, position.Row] = ".";
     while (num != 0)
     {
         points.Clear();
+        
         points.Add(Move(position, 1, 0));
         points.Add(Move(position, -1, 0));
         points.Add(Move(position, 0, 1));
         points.Add(Move(position, 0, -1));
         foreach (var point in points)
         {
-            if (0 <= point.Column && point.Column <= 20 && 0 <= point.Row && point.Row <= 20)
+            if (0 <= point.Column && point.Column < WIDTH && 0 <= point.Row && point.Row < HEIGHT)
             {
                 if (int.TryParse(map[point.Column, point.Row], out int n))
                 {
-                    if (int.Parse(map[point.Column, point.Row]) == num--)
+                    if (int.Parse(map[point.Column, point.Row]) == num-1)
                     {
                         position = point;
                         num = int.Parse(map[point.Column, point.Row]);
@@ -172,7 +132,7 @@ string[,] FindPath(string[,] mapOrigin, string[,] map, Point goal)
             }
         }
     }
-
+    mapOrigin[position.Column, position.Row] = "A";
     return mapOrigin;
 }
 
@@ -190,9 +150,12 @@ List<Point> GetShortestPath(string[,] map, Point start, Point goal)
 
 string[,] map = generator.Generate();
 new MapPrinter().Print(map);
-string[,] mapCopy = generator.Generate();
+var mapCopy = new string[WIDTH,HEIGHT];
+for (int i = 0; i < WIDTH; i++)
+    for (int k = 0; k < HEIGHT; k++)
+        mapCopy[i, k] = map[i, k];
 //GetShortestPath(map, new Point(0, 0), new Point(6, 12)));
-mapCopy = CreatePaths(mapCopy, new Point(0, 0), new Point(6, 12));
+mapCopy = CreatePaths(mapCopy, new Point(0, 0), new Point(WIDTH - 2, HEIGHT - 2));
 new MapPrinter().Print(mapCopy);
-map = FindPath(map, mapCopy, new Point(6, 12));
+map = FindPath(map, mapCopy, new Point(WIDTH - 2, 2));
 new MapPrinter().Print(map);

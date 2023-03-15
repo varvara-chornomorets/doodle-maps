@@ -14,7 +14,11 @@
                 Console.Write($"{row}\t");
                 for (var column = 0; column < maze.GetLength(0); column++)
                 {
-                    Console.Write(maze[column, row]);
+                    //if (maze[column, row].Length == 1 || maze[column, row].Length == 2)
+                    //    Console.Write(maze[column, row]+"  ");
+                    //else
+                        Console.Write(maze[column, row]);
+
                 }
 
                 Console.WriteLine();
